@@ -36,3 +36,32 @@ export async function onboardUser() {
     return { success: false, message: error.message };
   }
 }
+
+export async function getUserRole() {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { success: false, error: "No authenticated user found" };
+    }
+
+    const { id } = user;
+
+    const userRole = await prisma.user.findUnique({
+      where: {
+        clerkId: id,
+      },
+      select: {
+        role: true,
+      },
+    });
+
+    if (!userRole) {
+      return { success: false, error: "User not found in database" };
+    }
+
+    return { success: true, role: userRole.role };
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+    return { success: false, error: "Failed to fetch user role" };
+  }
+}
